@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Physique Seconde – Révisions</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0e14;
+    --surface: #16181f;
+    --card: #1e2028;
+    --accent: #7effa0;
+    --accent2: #5be3ff;
+    --accent3: #ffdd57;
+    --text: #eef0f7;
+    --muted: #7a7d8f;
+    --border: #2a2d3a;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 20px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+  }
+
+  header p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-top: 2px;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-bar-wrap {
+    background: var(--border);
+    border-radius: 99px;
+    height: 4px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* ── MODES ── */
+  .mode-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .mode-tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex-shrink: 0;
+    padding: 7px 16px;
+    border-radius: 99px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+
+  /* ── FILTERS ── */
+  .filters {
+    padding: 10px 16px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .filters::-webkit-scrollbar { display: none; }
+
+  .filter-btn {
+    flex-shrink: 0;
+    padding: 5px 13px;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .filter-btn.active {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(91,227,255,0.08);
+  }
+
+  /* ── MAIN ── */
+  main { padding: 16px; }
+
+  /* ── FLASHCARD MODE ── */
+  #mode-flash .card-count {
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .flashcard-wrap {
+    perspective: 1000px;
+    height: 260px;
+    cursor: pointer;
+    margin-bottom: 16px;
+    user-select: none;
+  }
+
+  .flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .flashcard-wrap.flipped .flashcard-inner {
+    transform: rotateY(180deg);
+  }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 28px 22px;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .card-face.front {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+  }
+
+  .card-face.back {
+    background: linear-gradient(135deg, #1a2820, #121822);
+    border: 1.5px solid var(--accent);
+    transform: rotateY(180deg);
+  }
+
+  .card-face .category-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: rgba(91,227,255,0.1);
+    padding: 3px 10px;
+    border-radius: 99px;
+  }
+
+  .card-face .card-term {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .card-face .tap-hint {
+    font-size: 0.65rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-top: 4px;
+  }
+
+  .card-face .card-def {
+    font-size: 1rem;
+    color: var(--accent);
+    line-height: 1.5;
+    font-weight: 700;
+  }
+
+  .card-nav {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .nav-btn {
+    flex: 1;
+    padding: 13px;
+    border-radius: var(--radius);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    max-width: 140px;
+  }
+  .nav-btn:active { opacity: 0.7; transform: scale(0.97); }
+  .nav-btn.primary {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+
+  /* ── QUIZ MODE ── */
+  #mode-quiz { display: none; }
+  #mode-quiz .quiz-q {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+
+  .quiz-q .q-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--accent3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .quiz-q .q-text {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 14px;
+  }
+
+  .quiz-choices { display: flex; flex-direction: column; gap: 9px; }
+
+  .choice-btn {
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .choice-btn:active { transform: scale(0.98); }
+  .choice-btn.correct { background: rgba(126,255,160,0.15); border-color: var(--accent); color: var(--accent); }
+  .choice-btn.wrong { background: rgba(255,80,80,0.12); border-color: #ff5050; color: #ff7070; }
+  .choice-btn.disabled { pointer-events: none; opacity: 0.5; }
+
+  .quiz-feedback {
+    display: none;
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .quiz-feedback.ok { background: rgba(126,255,160,0.1); color: var(--accent); }
+  .quiz-feedback.nope { background: rgba(255,80,80,0.1); color: #ff7070; }
+
+  .quiz-next-btn {
+    display: none;
+    width: 100%;
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: var(--bg);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* ── LISTE MODE ── */
+  #mode-list { display: none; }
+
+  .list-section { margin-bottom: 18px; }
+
+  .list-section-title {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent2);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 8px;
+    padding: 0 2px;
+  }
+
+  .list-item {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 7px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .list-item .term {
+    font-weight: 800;
+    font-size: 0.9rem;
+    min-width: 130px;
+    color: var(--accent3);
+    flex-shrink: 0;
+  }
+
+  .list-item .def {
+    font-size: 0.88rem;
+    color: var(--text);
+    opacity: 0.85;
+    line-height: 1.45;
+  }
+
+  /* ── SCORE ── */
+  .score-display {
+    text-align: center;
+    padding: 20px;
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    margin-bottom: 16px;
+    font-family: 'Space Mono', monospace;
+  }
+  .score-display .score-num {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .score-display .score-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚛ Physique – Seconde</h1>
+  <p>Mécanique & Forces • 50 notions</p>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+</header>
+
+<div class="mode-tabs">
+  <button class="tab active" onclick="setMode('flash')">Flashcards</button>
+  <button class="tab" onclick="setMode('quiz')">Quiz</button>
+  <button class="tab" onclick="setMode('list')">Tout voir</button>
+</div>
+
+<div class="filters" id="filtersBar">
+  <button class="filter-btn active" onclick="setFilter('all')">Tout</button>
+  <button class="filter-btn" onclick="setFilter('base')">Notions de base</button>
+  <button class="filter-btn" onclick="setFilter('mvt')">Mouvement</button>
+  <button class="filter-btn" onclick="setFilter('vecteurs')">Vecteurs</button>
+  <button class="filter-btn" onclick="setFilter('forces')">Forces</button>
+  <button class="filter-btn" onclick="setFilter('gravitation')">Gravitation</button>
+  <button class="filter-btn" onclick="setFilter('inertie')">Inertie</button>
+</div>
+
+<main>
+  <!-- FLASH -->
+  <div id="mode-flash">
+    <div class="card-count" id="cardCount"></div>
+    <div class="flashcard-wrap" id="flashcard" onclick="flipCard()">
+      <div class="flashcard-inner" id="flashcardInner">
+        <div class="card-face front">
+          <span class="category-tag" id="cardCategory"></span>
+          <div class="card-term" id="cardTerm">—</div>
+          <div class="tap-hint">Appuie pour voir la définition</div>
+        </div>
+        <div class="card-face back">
+          <span class="category-tag" id="cardCategoryBack"></span>
+          <div class="card-def" id="cardDef">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-nav">
+      <button class="nav-btn" onclick="prevCard()">← Précédent</button>
+      <button class="nav-btn primary" onclick="nextCard()">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="mode-quiz" style="display:none">
+    <div class="score-display">
+      <div class="score-num" id="quizScore">0</div>
+      <div class="score-label">BONNES RÉPONSES</div>
+    </div>
+    <div id="quizContainer"></div>
+  </div>
+
+  <!-- LIST -->
+  <div id="mode-list" style="display:none"></div>
+</main>
+
+<script>
+const ALL_NOTIONS = [
+  { term: "Système", def: "Objet ou ensemble d'objets que l'on étudie.", cat: "base" },
+  { term: "Point matériel", def: "Modèle d'un objet dont on ne considère que la position (taille négligeable).", cat: "base" },
+  { term: "Relativité", def: "Le mouvement dépend du référentiel choisi pour l'observer.", cat: "base" },
+  { term: "Référentiel", def: "Objet ou repère par rapport auquel on décrit un mouvement.", cat: "base" },
+  { term: "Inertie", def: "Tendance d'un objet à conserver son état de repos ou de mouvement.", cat: "base" },
+  { term: "Déplacement", def: "Changement de position d'un objet entre deux instants.", cat: "mvt" },
+  { term: "Durée", def: "Temps écoulé entre deux instants.", cat: "mvt" },
+  { term: "Mouvement", def: "Changement de position d'un objet au cours du temps.", cat: "mvt" },
+  { term: "Translation", def: "Mouvement où tous les points d'un objet se déplacent de la même façon.", cat: "mvt" },
+  { term: "Rotation", def: "Mouvement autour d'un axe.", cat: "mvt" },
+  { term: "Trajectoire", def: "Ensemble des positions successives d'un objet.", cat: "mvt" },
+  { term: "Rectiligne", def: "Trajectoire en ligne droite.", cat: "mvt" },
+  { term: "Curviligne", def: "Trajectoire en courbe.", cat: "mvt" },
+  { term: "Circulaire", def: "Trajectoire en cercle.", cat: "mvt" },
+  { term: "Uniforme", def: "Vitesse constante.", cat: "mvt" },
+  { term: "Accéléré", def: "La vitesse augmente.", cat: "mvt" },
+  { term: "Ralenti", def: "La vitesse diminue.", cat: "mvt" },
+  { term: "Distance", def: "Longueur du trajet parcouru.", cat: "mvt" },
+  { term: "Temps", def: "Grandeur qui mesure la durée.", cat: "mvt" },
+  { term: "Caractéristiques d'un vecteur", def: "Direction, sens, valeur (intensité) et point d'application.", cat: "vecteurs" },
+  { term: "Vitesse moyenne", def: "Distance parcourue divisée par la durée totale.", cat: "vecteurs" },
+  { term: "Vitesse instantanée", def: "Vitesse à un instant précis.", cat: "vecteurs" },
+  { term: "Variations de vitesse", def: "Changement de la vitesse au cours du temps.", cat: "vecteurs" },
+  { term: "Accélération", def: "Variation de la vitesse par unité de temps.", cat: "vecteurs" },
+  { term: "Chronophotographie", def: "Technique qui montre les positions successives d'un objet en mouvement sur une même image.", cat: "vecteurs" },
+  { term: "Force", def: "Action capable de modifier le mouvement ou la forme d'un objet.", cat: "forces" },
+  { term: "Interaction", def: "Action réciproque entre deux objets.", cat: "forces" },
+  { term: "Forces résistantes", def: "Frottement de l'air, frottement du sol, résistance de l'eau.", cat: "forces" },
+  { term: "Actions à distance", def: "Gravitation, interaction électrique.", cat: "forces" },
+  { term: "Actions par contact", def: "Poussée, traction, frottement.", cat: "forces" },
+  { term: "Intensité de la pesanteur", def: "Valeur du champ de pesanteur (environ 9,8 N/kg sur Terre).", cat: "gravitation" },
+  { term: "Masse", def: "Quantité de matière d'un objet (en kg).", cat: "gravitation" },
+  { term: "Gravité", def: "Attraction entre les masses.", cat: "gravitation" },
+  { term: "Constante gravitationnelle", def: "Constante utilisée pour calculer la force de gravitation.", cat: "gravitation" },
+  { term: "Poids", def: "Force exercée par la Terre sur un objet.", cat: "gravitation" },
+  { term: "Principe de l'inertie (P.I.)", def: "Si les forces se compensent, un objet reste au repos ou en mouvement rectiligne uniforme.", cat: "inertie" },
+  { term: "Réciproque du P.I.", def: "Si un objet est au repos ou en MRU, alors les forces se compensent.", cat: "inertie" },
+  { term: "Contraposée du P.I.", def: "Si un objet n'est pas au repos ou en MRU, alors les forces ne se compensent pas.", cat: "inertie" },
+  { term: "Réciproque de la contraposée", def: "Si les forces ne se compensent pas, alors le mouvement n'est pas rectiligne uniforme.", cat: "inertie" },
+];
+
+const CAT_LABELS = {
+  base: "Notions de base", mvt: "Mouvement", vecteurs: "Vecteurs & Vitesse",
+  forces: "Forces & Interactions", gravitation: "Gravitation & Poids", inertie: "Principe d'inertie"
+};
+
+let currentFilter = 'all';
+let currentMode = 'flash';
+let currentIndex = 0;
+let flipped = false;
+let filteredCards = [...ALL_NOTIONS];
+
+// Quiz state
+let quizCards = [];
+let quizIndex = 0;
+let quizScore = 0;
+
+function getFiltered() {
+  return currentFilter === 'all' ? ALL_NOTIONS : ALL_NOTIONS.filter(n => n.cat === currentFilter);
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  currentIndex = 0;
+  flipped = false;
+  filteredCards = getFiltered();
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (currentMode === 'flash') renderFlash();
+  if (currentMode === 'list') renderList();
+  if (currentMode === 'quiz') startQuiz();
+}
+
+function setMode(m) {
+  currentMode = m;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab')[['flash','quiz','list'].indexOf(m)].classList.add('active');
+  document.getElementById('mode-flash').style.display = m === 'flash' ? 'block' : 'none';
+  document.getElementById('mode-quiz').style.display = m === 'quiz' ? 'block' : 'none';
+  document.getElementById('mode-list').style.display = m === 'list' ? 'block' : 'none';
+  if (m === 'flash') renderFlash();
+  if (m === 'quiz') startQuiz();
+  if (m === 'list') renderList();
+}
+
+/* ── FLASHCARDS ── */
+function renderFlash() {
+  const fc = document.getElementById('flashcard');
+  fc.classList.remove('flipped');
+  flipped = false;
+  const cards = filteredCards;
+  const card = cards[currentIndex];
+  document.getElementById('cardCount').textContent = `${currentIndex + 1} / ${cards.length}`;
+  document.getElementById('cardTerm').textContent = card.term;
+  document.getElementById('cardDef').textContent = card.def;
+  document.getElementById('cardCategory').textContent = CAT_LABELS[card.cat];
+  document.getElementById('cardCategoryBack').textContent = CAT_LABELS[card.cat];
+  document.getElementById('progressBar').style.width = ((currentIndex + 1) / cards.length * 100) + '%';
+}
+
+function flipCard() {
+  flipped = !flipped;
+  document.getElementById('flashcard').classList.toggle('flipped', flipped);
+}
+
+function nextCard() {
+  const cards = filteredCards;
+  currentIndex = (currentIndex + 1) % cards.length;
+  flipped = false;
+  renderFlash();
+}
+
+function prevCard() {
+  const cards = filteredCards;
+  currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+  flipped = false;
+  renderFlash();
+}
+
+/* ── QUIZ ── */
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+function startQuiz() {
+  quizCards = shuffle(filteredCards);
+  quizIndex = 0;
+  quizScore = 0;
+  document.getElementById('quizScore').textContent = '0';
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const container = document.getElementById('quizContainer');
+  if (quizIndex >= quizCards.length) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:30px 10px;background:var(--card);border-radius:var(--radius);border:1.5px solid var(--border)">
+        <div style="font-size:2.5rem;margin-bottom:10px">🏁</div>
+        <div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin-bottom:6px">${quizScore} / ${quizCards.length}</div>
+        <div style="color:var(--muted);font-size:0.8rem;font-family:'Space Mono',monospace;margin-bottom:20px">Quiz terminé !</div>
+        <button onclick="startQuiz()" style="padding:12px 28px;background:var(--accent);color:var(--bg);border:none;border-radius:99px;font-family:'Space Mono',monospace;font-weight:700;font-size:0.85rem;cursor:pointer">Recommencer</button>
+      </div>`;
+    return;
+  }
+
+  const card = quizCards[quizIndex];
+  // 3 wrong answers from pool
+  const others = shuffle(filteredCards.filter(c => c.term !== card.term)).slice(0, 3);
+  const choices = shuffle([card, ...others]);
+
+  container.innerHTML = `
+    <div class="quiz-q">
+      <div class="q-tag">Question ${quizIndex + 1} / ${quizCards.length}</div>
+      <div class="q-text">Quelle est la définition de « ${card.term} » ?</div>
+      <div class="quiz-choices" id="choices">
+        ${choices.map((c, i) => `
+          <button class="choice-btn" onclick="checkAnswer(this, ${c.term === card.term})">${c.def}</button>
+        `).join('')}
+      </div>
+      <div class="quiz-feedback" id="feedback"></div>
+      <button class="quiz-next-btn" id="quizNext" onclick="nextQuiz()">Question suivante →</button>
+    </div>`;
+}
+
+function checkAnswer(btn, correct) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.classList.add('disabled'));
+  const fb = document.getElementById('feedback');
+  if (correct) {
+    btn.classList.add('correct');
+    quizScore++;
+    document.getElementById('quizScore').textContent = quizScore;
+    fb.textContent = '✓ Bonne réponse !';
+    fb.className = 'quiz-feedback ok';
+  } else {
+    btn.classList.add('wrong');
+    fb.textContent = '✗ Pas tout à fait — regarde la bonne réponse.';
+    fb.className = 'quiz-feedback nope';
+    // highlight correct
+    document.querySelectorAll('.choice-btn').forEach(b => {
+      if (!b.classList.contains('wrong') && !b.classList.contains('disabled')) b.classList.add('correct');
+    });
+    // find correct btn
+    const correctCard = quizCards[quizIndex];
+    document.querySelectorAll('.choice-btn').forEach(b => {
+      if (b.textContent.trim() === correctCard.def) b.classList.add('correct');
+    });
+  }
+  fb.style.display = 'block';
+  document.getElementById('quizNext').style.display = 'block';
+}
+
+function nextQuiz() {
+  quizIndex++;
+  renderQuiz();
+}
+
+/* ── LISTE ── */
+function renderList() {
+  const container = document.getElementById('mode-list');
+  const byCategory = {};
+  filteredCards.forEach(n => {
+    if (!byCategory[n.cat]) byCategory[n.cat] = [];
+    byCategory[n.cat].push(n);
+  });
+  container.innerHTML = Object.entries(byCategory).map(([cat, items]) => `
+    <div class="list-section">
+      <div class="list-section-title">${CAT_LABELS[cat]}</div>
+      ${items.map(n => `
+        <div class="list-item">
+          <div class="term">${n.term}</div>
+          <div class="def">${n.def}</div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+// Init
+filteredCards = getFiltered();
+renderFlash();
+</script>
+</body>
+</html>
